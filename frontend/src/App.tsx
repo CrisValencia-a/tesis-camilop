@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Productos from "./pages/Productos.tsx";
 import Ventas from "./pages/Ventas.tsx";
 import Navbar from "./components/Navbar.tsx";
+import Catalogo from "./pages/Catalogo";
 import { Toaster } from "react-hot-toast";
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Productos />} />
             <Route path="/ventas" element={<Ventas />} />
+            <Route path="/catalogo" element={<Catalogo />} />
           </Routes>
         </main>
       </div>

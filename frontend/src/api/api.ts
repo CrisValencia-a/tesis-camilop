@@ -36,3 +36,35 @@ export const crearVenta = async (data: {
 
   return res.json();
 };
+
+type CatalogoItemRequest = {
+  producto_id: number;
+  precio: number;
+  stock_actual: number;
+  stock_minimo: number;
+};
+
+// 📦 Catalogo
+export const crearCatalogo = async (data: {
+  mes: number;
+  anio: number;
+  productos: CatalogoItemRequest[];
+}) => {
+  const res = await fetch(`${API_URL}/catalogos`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+
+  return res.json();
+};
+
+export const getCatalogo = async (mes: number, anio: number) => {
+  const res = await fetch(
+    `${API_URL}/catalogos?mes=${mes}&anio=${anio}`
+  );
+
+  return res.json();
+};

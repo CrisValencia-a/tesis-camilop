@@ -30,6 +30,20 @@ export default function Navbar() {
             Productos
           </NavLink>
 
+          {/* CATALOGO */}
+          <NavLink
+            to="/catalogo"
+            className={({ isActive }) =>
+              `text-sm font-bold pb-1 border-b-2 transition-all ${
+                isActive
+                  ? "text-[#FF9E5E] border-[#FF9E5E]"
+                  : "text-[#A39E9B] border-transparent hover:text-[#3D3A38]"
+              }`
+            }
+          >
+            Catalogo
+          </NavLink>
+
           {/* VENTAS */}
           <NavLink
             to="/ventas"
@@ -43,6 +57,7 @@ export default function Navbar() {
           >
             Ventas
           </NavLink>
+
 
         </div>
       </div>

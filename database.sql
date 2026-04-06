@@ -71,14 +71,91 @@ CREATE INDEX IF NOT EXISTS idx_detalle_venta_id ON detalle_ventas(venta_id);
 CREATE INDEX IF NOT EXISTS idx_detalle_producto_id ON detalle_ventas(producto_id);
 CREATE INDEX IF NOT EXISTS idx_movimientos_producto_id ON movimientos_stock(producto_id);
 
--- =========================================
--- DATOS DE PRUEBA (OPCIONAL)
--- =========================================
--- Puedes comentar esto si no quieres datos iniciales
 
--- INSERT INTO productos (nombre, categoria, precio, stock_actual, stock_minimo)
--- VALUES
---   ('Galleta Decorada', 'galletas', 1500, 50, 10),
---   ('Macaron', 'macarons', 1200, 40, 10),
---   ('Torta Chocolate', 'tortas', 15000, 10, 2)
--- ON CONFLICT DO NOTHING;
+-- =========================================
+-- TABLA: catalogos
+-- =========================================
+CREATE TABLE IF NOT EXISTS catalogos (
+  id SERIAL PRIMARY KEY,
+  mes INT NOT NULL,
+  anio INT NOT NULL,
+  creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  UNIQUE (mes, anio)
+);
+
+-- =========================================
+-- TABLA: catalogo_productos
+-- =========================================
+CREATE TABLE IF NOT EXISTS catalogo_productos (
+  id SERIAL PRIMARY KEY,
+  catalogo_id INT REFERENCES catalogos(id) ON DELETE CASCADE,
+  producto_id INT REFERENCES productos(id),
+
+  UNIQUE (catalogo_id, producto_id)
+);
+
+ALTER TABLE productos
+DROP COLUMN precio,
+DROP COLUMN stock_actual,
+DROP COLUMN stock_minimo;
+
+ALTER TABLE catalogo_productos
+ADD COLUMN precio NUMERIC(10,2) NOT NULL default 1,
+ADD COLUMN stock_actual INT NOT NULL default 1,
+ADD COLUMN stock_minimo INT NOT NULL default 1;
+
+ALTER TABLE detalle_ventas
+ADD COLUMN catalogo_id INT;
+
+ALTER TABLE detalle_ventas
+ADD CONSTRAINT fk_catalogo_producto
+FOREIGN KEY (catalogo_id)
+REFERENCES catalogo_productos(id)
+ON DELETE CASCADE;
+
+
+SELECT * FROM productos
+
+select * from catalogos WHERE mes=4 and anio=2026
+SELECT * FROM catalogo_productos where catalogo_id=16
+SELECT * FROM ventas 
+WHERE fecha >= '2026-01-03' AND fecha < '2025-02-05';
+
+SELECT * FROM ventas order by fecha where fecha  >= '2026-03-26' AND fecha < '2026-04-27' order by fecha
+SELECT * FROM ventas where id in (485, 486,487)
+SELECT SUM(total) AS total_ventas
+FROM ventas;
+
+--select SUM(subtotal) as subtotal from detalle_ventas
+--SELECT SUM(cantidad) as cantidad FROM detalle_ventas
+select * from detalle_ventas where 
+SELECT  * FROM detalle_ventas where venta_id in (SELECT id FROM ventas 
+WHERE fecha >= '2025-01-01' AND fecha < '2025-02-01') and producto_id=1
+
+SELECT SUM(subtotal) AS total_ventas
+FROM detalle_ventas;
+
+select * from movimientos_stock where producto_id=5 and motivo='stock inicial'
+
+ALTER TABLE detalle_ventas
+ADD COLUMN catalogo_producto_id INT;
+
+UPDATE detalle_ventas dv
+SET catalogo_producto_id = cp.id
+FROM catalogo_productos cp
+WHERE dv.producto_id = cp.producto_id
+AND dv.catalogo_id = cp.catalogo_id;
+
+ALTER TABLE detalle_ventas DROP COLUMN producto_id;
+ALTER TABLE detalle_ventas DROP COLUMN catalogo_id;
+
+-- RESET DE TABLAS
+TRUNCATE TABLE 
+detalle_ventas,
+ventas,
+movimientos_stock,
+catalogo_productos,
+catalogos,
+productos
+RESTART IDENTITY CASCADE;

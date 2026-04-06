@@ -8,7 +8,7 @@ export type Producto = {
 };
 
 export type VentaItemRequest = {
-  producto_id: number;
+  catalogo_producto_id: number;
   cantidad: number;
 };
 
@@ -22,4 +22,11 @@ export type Venta = {
   id: number;
   total: number;
   fecha: string;
+};
+
+export type ProductoCatalogo = {
+  producto_id: number;
+  nombre: string;
+  precio: number;
+  stock_actual: number;
 };
