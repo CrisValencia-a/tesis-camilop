@@ -5,7 +5,7 @@ import { toast } from "react-hot-toast";
 
 // 🔥 NUEVO tipo basado en catálogo
 type ProductoCatalogo = {
-  id: number; // 👈 ID del catálogo
+  id: number;
   producto_id: number;
   nombre: string;
   precio: number;
@@ -15,6 +15,7 @@ type ProductoCatalogo = {
 type VentaItemRequest = {
   catalogo_producto_id: number;
   cantidad: number;
+  tipo_cliente: string;
 };
 
 export default function Ventas() {
@@ -22,7 +23,16 @@ export default function Ventas() {
   const [items, setItems] = useState<VentaItemRequest[]>([]);
   const [mostrarModal, setMostrarModal] = useState(false);
 
-  // 🔄 Cargar catálogo actual
+  // 🔥 NUEVO
+  const [tipoCliente, setTipoCliente] = useState<string>("Cliente Personal");
+
+  const tiposCliente = [
+    "Cliente Personal",
+    "Cliente Eventos",
+    "Cliente Corporativo",
+    "Cliente Comercial",
+  ];
+
   useEffect(() => {
     cargarProductos();
   }, []);
@@ -34,7 +44,7 @@ export default function Ventas() {
       const anio = fecha.getFullYear();
 
       const data = await getCatalogo(mes, anio);
-      
+
       if (data.length === 0) {
         toast("No hay catálogo definido para este mes", {
           icon: "📅",
@@ -47,7 +57,6 @@ export default function Ventas() {
     }
   };
 
-  // ➕ Agregar producto
   const agregarProducto = () => {
     if (productos.length === 0) {
       toast("No hay productos disponibles en el catálogo", {
@@ -72,11 +81,11 @@ export default function Ventas() {
       {
         catalogo_producto_id: disponibles[0].id,
         cantidad: 1,
+        tipo_cliente: tipoCliente,
       },
     ]);
   };
 
-  // 🔄 Actualizar item
   const actualizarItem = (
     index: number,
     campo: "catalogo_producto_id" | "cantidad",
@@ -84,7 +93,6 @@ export default function Ventas() {
   ) => {
     const nuevos = [...items];
 
-    // 🚫 evitar duplicados
     if (campo === "catalogo_producto_id") {
       const existe = nuevos.some(
         (item, i) => item.catalogo_producto_id === valor && i !== index
@@ -102,13 +110,11 @@ export default function Ventas() {
     setItems(nuevos);
   };
 
-  // ❌ eliminar
   const eliminarItem = (index: number) => {
     const nuevos = items.filter((_, i) => i !== index);
     setItems(nuevos);
   };
 
-  // 💰 total
   const calcularTotal = () => {
     return items.reduce((total, item) => {
       const producto = productos.find(
@@ -119,7 +125,6 @@ export default function Ventas() {
     }, 0);
   };
 
-  // 📤 confirmar venta
   const confirmarVenta = async () => {
     try {
       if (items.length === 0) {
@@ -130,18 +135,20 @@ export default function Ventas() {
       }
 
       await crearVenta({
+        tipo_cliente: tipoCliente, // 🔥 NUEVO
         productos: items,
       });
 
       toast.success("Venta registrada correctamente");
 
       setItems([]);
+      setTipoCliente("Cliente Personal"); // reset
     } catch (error) {
       console.error(error);
       toast.error("Error al registrar venta");
     } finally {
       setMostrarModal(false);
-      cargarProductos(); // refresca stock
+      cargarProductos();
     }
   };
 
@@ -154,16 +161,36 @@ export default function Ventas() {
             Registrar Venta
           </h2>
 
-          <button
-            onClick={agregarProducto}
-            className="flex items-center gap-2 text-[#FF9E5E] font-bold hover:text-[#F28C48] transition-all group bg-[#FF9E5E]/5 px-4 py-2 rounded-full"
-          >
-            <span className="w-6 h-6 rounded-full bg-[#FF9E5E] text-white flex items-center justify-center text-sm group-hover:scale-110 transition-transform">
-              +
-            </span>
-            Agregar producto
-          </button>
-        </div>
+          <div className="flex items-center gap-4">
+            {/* 🔥 SELECT TIPO CLIENTE */}
+            <div className="flex flex-col">
+              <label className="text-[10px] font-bold text-[#A39E9B] uppercase tracking-widest mb-1 ml-1">
+                Tipo Cliente
+              </label>
+              <select
+                value={tipoCliente}
+                onChange={(e) => setTipoCliente(e.target.value)}
+                className="p-2 rounded-xl bg-white shadow-sm border-none focus:ring-2 focus:ring-[#FF9E5E] outline-none"
+              >
+                {tiposCliente.map((tipo) => (
+                  <option key={tipo} value={tipo}>
+                    {tipo}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <button
+              onClick={agregarProducto}
+              className="flex items-center gap-2 text-[#FF9E5E] font-bold hover:text-[#F28C48] transition-all group bg-[#FF9E5E]/5 px-4 py-2 rounded-full"
+            >
+              <span className="w-6 h-6 rounded-full bg-[#FF9E5E] text-white flex items-center justify-center text-sm group-hover:scale-110 transition-transform">
+                +
+              </span>
+              Agregar producto
+            </button>
+          </div>
+          </div>
 
         {/* ITEMS */}
         <div className="space-y-4">

@@ -35,10 +35,20 @@ CREATE TABLE catalogo_productos (
 );
 
 -- 🧾 VENTAS
+-- CREATE TABLE ventas (
+--     id SERIAL PRIMARY KEY,
+--     fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--     total INT DEFAULT 0
+-- );
+
+-- 🧾 VENTAS
 CREATE TABLE ventas (
     id SERIAL PRIMARY KEY,
     fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    total INT DEFAULT 0
+    total INT DEFAULT 0,
+    tipo_cliente VARCHAR(20) NOT NULL DEFAULT 'Cliente Personal',
+
+    CHECK (tipo_cliente IN ('Cliente Personal', 'Cliente Eventos', 'Cliente Corporativo', 'Cliente Comercial'))
 );
 
 -- 🧾 DETALLE DE VENTAS (🔥 NUEVA ESTRUCTURA)
@@ -85,6 +95,7 @@ SELECT
   DATE_TRUNC('month', v.fecha) AS mes_fecha,
   DATE_TRUNC('week', v.fecha) AS semana_fecha,
   v.total,
+  v.tipo_cliente, --nuevo
 
   p.id AS producto_id,
   p.nombre,

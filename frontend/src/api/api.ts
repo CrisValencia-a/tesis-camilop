@@ -1,4 +1,4 @@
-import type { Producto, VentaItemRequest } from "../types/index.ts";
+import type { Producto, CrearVentaRequest  } from "../types/index.ts";
 
 const API_URL = "http://localhost:3000/api";
 
@@ -23,9 +23,7 @@ export const crearProducto = async (
 };
 
 // 💰 Ventas
-export const crearVenta = async (data: {
-  productos: VentaItemRequest[];
-}) => {
+export const crearVenta = async (data: CrearVentaRequest) => {
   const res = await fetch(`${API_URL}/ventas`, {
     method: "POST",
     headers: {

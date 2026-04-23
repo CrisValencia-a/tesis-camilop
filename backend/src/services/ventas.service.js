@@ -1,5 +1,13 @@
 import pool from '../config/db.js';
 
+// ✅ Tipos válidos (alineado con BD)
+const TIPOS_CLIENTE = [
+  'Cliente Personal',
+  'Cliente Eventos',
+  'Cliente Coorporativo',
+  'Cliente Comercial'
+];
+
 // ✅ Validaciones
 const validarVenta = (ventaData) => {
   if (!ventaData.productos || !Array.isArray(ventaData.productos)) {
@@ -8,6 +16,15 @@ const validarVenta = (ventaData) => {
 
   if (ventaData.productos.length === 0) {
     throw new Error('La venta debe tener al menos un producto');
+  }
+
+  // 🔥 NUEVO: validar tipo_cliente
+  if (!ventaData.tipo_cliente) {
+    throw new Error('tipo_cliente es obligatorio');
+  }
+
+  if (!TIPOS_CLIENTE.includes(ventaData.tipo_cliente)) {
+    throw new Error('tipo_cliente inválido');
   }
 
   for (const item of ventaData.productos) {
@@ -29,16 +46,21 @@ export const crearVenta = async (ventaData) => {
   try {
     await client.query('BEGIN');
 
-    // 🧾 Crear venta
+    const { tipo_cliente } = ventaData;
+
+    // 🧾 Crear venta (🔥 ahora con tipo_cliente)
     const ventaResult = await client.query(
-      `INSERT INTO ventas DEFAULT VALUES RETURNING *`
+      `INSERT INTO ventas (tipo_cliente)
+       VALUES ($1)
+       RETURNING *`,
+      [tipo_cliente]
     );
 
     const ventaId = ventaResult.rows[0].id;
 
     let total = 0;
 
-    // 🔥 Obtener todos los productos del catálogo (lookup eficiente)
+    // 🔥 Lookup eficiente (se mantiene igual)
     const productosCatalogo = await client.query(`
       SELECT 
         cp.id,
@@ -71,7 +93,7 @@ export const crearVenta = async (ventaData) => {
       const subtotal = cantidad * producto.precio;
       total += subtotal;
 
-      // 🧾 Insertar detalle (🔥 SOLO catalogo_producto_id)
+      // 🧾 Insertar detalle
       await client.query(
         `INSERT INTO detalle_ventas 
           (venta_id, catalogo_producto_id, cantidad, precio_unitario, subtotal)
@@ -140,7 +162,6 @@ export const obtenerVentas = async (filtros) => {
   return result.rows;
 };
 
-
 // 🔍 Venta por ID
 export const obtenerVentaPorId = async (id) => {
   const venta = await pool.query(
@@ -168,7 +189,7 @@ export const obtenerVentaPorId = async (id) => {
   );
 
   return {
-    ...venta.rows[0],
+    ...venta.rows[0], // 🔥 incluye tipo_cliente automáticamente
     productos: detalle.rows
   };
 };

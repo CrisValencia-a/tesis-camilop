@@ -10,6 +10,7 @@ export type Producto = {
 export type VentaItemRequest = {
   catalogo_producto_id: number;
   cantidad: number;
+  tipo_cliente: string;
 };
 
 export type VentaItem = {
@@ -29,4 +30,9 @@ export type ProductoCatalogo = {
   nombre: string;
   precio: number;
   stock_actual: number;
+};
+
+export type CrearVentaRequest = {
+  tipo_cliente: string; // 🔥 nuevo campo
+  productos: VentaItemRequest[];
 };
